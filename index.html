@@ -1,0 +1,1124 @@
+<html lang="en">
+  <head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+    <title>OmniInsert</title>
+    <meta name="description" content="Mask-Free Video Insertion of Any Reference via Diffusion Transformer Models">
+    <meta name="keywords" content="Video Generation, Multi-Modal">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#EDE8F5">
+    <meta property="og:image" content="">
+    <link rel="stylesheet" href="./assets/index.css">
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.2/css/bootstrap.min.css'>
+    <link rel="shortcut icon" href="./assets/favicon.png" type="image/x-icon">
+    <style>
+        @font-face {
+            font-family: 'Roboto';
+            font-style: normal;
+            font-stretch: 100%;
+            font-display: block;
+            font-weight: 300 700;
+            src: url('./assets/roboto.woff2') format('woff2');
+            unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+        }
+
+        @font-face {
+          font-family: 'DancingScript';
+          src: url('./assets/DancingScript-Bold.ttf') format('truetype');
+        }
+
+        @font-face {
+          font-family: 'Caveat';
+          src: url('./assets/Caveat-Medium.ttf') format('truetype');
+        }
+
+        @font-face {
+          font-family: 'Alegreya';
+          src: url('./assets/Alegreya-Regular.ttf') format('truetype');
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        video {
+            background-color: #000000;
+            aspect-ratio: 16 / 9;
+        }
+
+        section.portrait video {
+            background-color: #000000;
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+        }
+
+        section.multi_ip video {
+            background-color: #000000;
+            aspect-ratio: 4 / 3;
+            object-fit: cover;
+        }
+
+        section.portrait .prompt-wrap.full-screen-wrap video {
+            object-fit: cover;
+        }
+
+        section.portrait .flex {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            gap: 10px;
+        }
+
+        section.portrait2 .flex {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: flex-start;
+        }
+
+        section.portrait .flex > div {
+            flex: 0 0 calc((100% - 5 * 10px) / 6);
+        }
+        section.portrait2 .flex > div {
+            flex: 0 0 calc((100% - 1 * 10px) / 2);
+        }
+
+        section.portrait .prompt {
+            font-size: 10px;
+        }
+        section.portrait2 .prompt {
+            font-size: 12px;
+        }
+
+        section.portrait .flex-row {
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+        }
+
+        section.portrait2 .flex-row {
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            section.portrait .flex > div {
+                flex: 0 0 calc((100% - 1 * 10px) / 2);
+            }
+        }
+
+        @media (max-width: 768px) {
+            section.portrait2 .flex > div {
+                flex: 0 0 calc((100% - 0 * 10px) / 1);
+            }
+        }
+
+        /* Ensure prompt adjusts for portrait mode */
+        .portrait .prompt {
+            position: absolute;  /* Allow positioning relative to the container */
+            bottom: 5%;          /* Adjust this to control the vertical placement of the prompt */
+            left: 50%;           /* Center horizontally */
+            transform: translateX(-50%); /* Offset by 50% of its width to truly center */
+            max-width: 80%;
+            text-align: center;  /* Center the text inside the prompt */
+            color: white;        /* Optional, if you want the text to stand out */
+            font-size: 1.2em;    /* Optional, adjust the text size */
+        }
+
+        .portrait2 .prompt{
+            position: absolute;  /* Allow positioning relative to the container */
+            bottom: 5%;          /* Adjust this to control the vertical placement of the prompt */
+            left: 50%;           /* Center horizontally */
+            transform: translateX(-50%); /* Offset by 50% of its width to truly center */
+            max-width: 80%;
+            text-align: center;  /* Center the text inside the prompt */
+            color: white;        /* Optional, if you want the text to stand out */
+            font-size: 1.2em;    /* Optional, adjust the text size */
+        }
+
+        body {
+            background-color: #000000;
+            color: #ffffff;
+            font-family: "Roboto", sans-serif;
+            padding: 0;
+            margin: 0;
+        }
+
+        #intro {
+            padding: 100px 0 0px 0;
+            justify-content: center; /* Center content vertically */
+            text-align: center; /* Center text alignment */
+            /* background-image: url('./assets/background.png'); */
+            background-size: cover; /* Cover the entire container */
+            background-position: center; /* Center the background image */
+            color: #ffffff; /* Ensure text color is readable */
+            position: relative; /* 新增：作为视频背景的定位容器 */
+            overflow: hidden; /* 新增：隐藏超出容器的视频部分 */
+            min-height: 100vh; /* 新增：确保有足够高度显示内容 */
+        }
+
+        /* 新增：视频背景样式 */
+        .video-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0; /* 置于内容下方 */
+        }
+        
+        .video-background video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* 保持比例填充容器 */
+            opacity: 0.3; /* 适当降低透明度，增强文字可读性 */
+        }
+        
+        #intro .content {
+            position: relative;
+            z-index: 1; /* 确保内容显示在视频上方 */
+        }
+
+        #intro h1 {
+            font-size: 90px;
+            font-weight: 300;
+            margin: 20px 0;
+        } 
+
+        #intro h2 {
+            margin: 20px 0 40px 0;
+            font-weight: 300;
+            color: #ffffff
+        }
+
+        #intro h2 strong {
+            color: #fff;
+        }
+
+        .authors {
+            font-size: 16px;
+            font-weight: 500;
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 25px;
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .author-block {
+            display: inline-block;
+            margin: 0 10px 0 10px;
+        }
+
+        .author-block a {
+            color: #ffffff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .author-block a:hover {
+            color: #fff;
+        }
+
+        .author-affiliation {
+            font-size: 16px;
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 60px;
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .author-affiliation .author-block {
+            display: inline-block;
+            margin: 0 15px;
+        }
+
+        section {
+            max-width: 1920px;
+            margin: 0 auto;
+        }
+
+        .content {
+            padding: 0 10%;
+        }
+
+        .button {
+            background-color: #ccc;
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 100px;
+            cursor: pointer;
+            transition: background-color 0.5s;
+            text-decoration: none;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            display: inline-block;
+        }
+
+        .button:hover {
+            background-color: #fff;
+        }
+
+        .bibtex-section {
+            background-color: #111;
+            padding: 40px 10%;
+            text-align: center;
+            margin-top: 60px;
+            color: #ccc;
+        }
+
+        .bibtex-section h3 {
+            font-size: 24px;
+            font-weight: 400;
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+
+        .bibtex-code {
+            background-color: #222;
+            color: #ddd;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: left;
+            display: inline-block;
+            font-family: monospace;
+            max-width: 800px;
+            overflow-x: auto;
+        }
+
+        section {
+            margin-top: 80px;
+        }
+        section:first-of-type {
+            margin-top: 0;
+        }
+
+        .title {
+            background-color: #000;
+            position: sticky;
+            top: 0;
+            padding: 20px 10%;
+            font-size: 20px;
+            font-weight: 600;
+            z-index: 1000;
+            min-height: 60px;
+            box-sizing: border-box;
+        }
+
+        .description {
+            padding: 0 10% 20px 10%;
+            color: #999;
+            line-height: 25px;
+            font-weight: 300;
+        }
+
+        .highlight {
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .flex-row {
+            display: flex;
+            column-gap: 5px;
+            flex-wrap: nowrap;
+            justify-content: space-between;
+            padding: 0 5px 5px 5px;
+            
+        }
+
+        .flex-row > div {
+            flex-grow: 1;
+            flex-basis: 0;
+            position: relative;
+        }
+
+        .flex > div {
+            /* width: calc(100% / 3 - 5px * 2 / 3); */
+            width: calc(100% / 4 - 5px * 3 / 4);
+            margin-top: 2.5px;
+            margin-bottom: 2.5px;
+            position: relative;
+        }
+
+        .flex {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            padding: 0 5px;
+        }
+
+        .prompt-wrap {
+            position: relative;
+        }
+
+        .flex-2 {
+            justify-content: center;
+            column-gap: 5px;
+        }
+        .flex-2 > div {
+            width: calc(100% / 2 - 5px / 2);
+            min-width: calc(100% / 3 - 5px * 2 / 3);
+            max-width: calc(100vh - 200px);
+        }
+
+        video, img {
+            width: 100%;
+        }
+
+        .loading-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: rgba(255, 255, 255, 0.6);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .loading-text {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .loading-icon {
+            font-size: 48px;
+        }
+
+        .prompt {
+            max-width: calc(100% - 20px);
+            position: absolute;
+            background: rgba(0,0,0,0.5);
+            color: rgba(255,255,255,0.9);
+            font-size: 10px;
+            backdrop-filter: blur(10px);
+            top: 10px;
+            left: 10px;
+            padding: 5px 10px;
+            border-radius: 15px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+            box-sizing: border-box;
+        }
+
+        .flex-very-compact .full-screen-button {
+            width: 100%;
+            height: 100%;
+            top: 0;
+            right: 0;
+            border-radius: 0;
+        }
+
+        .chinese {
+            font-family: 'Noto Sans SC', sans-serif;
+            font-weight: bold;
+            color: #d18585;
+            font-size: 1.1em;
+        }
+
+        @media (hover: hover) {
+            .prompt-wrap:hover .prompt,
+            .full-screen-wrap:hover .full-screen-button {
+                opacity: 1;
+                pointer-events: all;
+            }
+            #contributors a:hover {
+                background-color: #222;
+            }
+        }
+
+        @media (hover: none) {
+            #contributors a {
+                pointer-events: none;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .flex-dynamic > div {
+                width: calc(100% / 2 - 5px / 2);
+            }
+        }
+
+        @media (max-width: 640px) {
+            #intro h1 {
+                font-size: 50px;
+            }
+            #intro h2 {
+                font-size: 20px;
+            }
+            .ruler {
+                font-size: 10px;
+            }
+        }
+
+        @media (max-width: 512px) {
+            .flex-dynamic > div,
+            .flex-dynamic-1 > div {
+                width: 100%;
+            }
+
+            .content {
+                padding: 0 12px;
+            }
+
+            .description {
+                padding: 0 12px 20px 12px;
+            }
+
+            .title {
+                padding: 20px 12px;
+            }
+
+            .ruler-tight {
+                font-size: 6px;
+                column-gap: 0;
+            }
+
+            .title-long {
+                font-size: 16px;
+            }
+
+        }
+
+        .margin-top {
+            margin-top: 50px;
+        }
+
+        .ruler {
+            text-align: center;
+            position: sticky;
+            top: 60px;
+            z-index: 999;
+            background-color: #000;
+            color: #999;
+            padding: 5px 0;
+        }
+
+        .ruler > div {
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .selected {
+            box-shadow: 0 0 0 5px #fff;
+        }
+
+        #title-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        #title-icon {
+          height: 8em;
+          width: auto;
+          margin-right: 0px;
+          vertical-align: middle;
+        }
+
+        .title-art {
+          font-family: 'DancingScript', sans-serif;
+        }
+
+        .title-art2 {
+          font-family: 'Caveat', sans-serif;
+        }
+
+        .title-art3 {
+          font-family: 'Alegreya', sans-serif;
+        }
+
+
+        header {
+            position: relative;
+            background: none;
+            color: white;
+            text-align: center;
+            overflow: hidden;
+            width: 100%;
+            /* Maintain 16:9 aspect ratio for 1080p video */
+            aspect-ratio: 16 / 9;
+            min-height: 340px;
+        }
+        @supports not (aspect-ratio: 16/9) {
+            header {
+                height: 56.25vw; /* fallback for browsers without aspect-ratio */
+                min-height: 340px;
+                max-height: 600px;
+            }
+        }
+        .header-bg-video {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            opacity: 1;
+            pointer-events: none;
+        }
+        .header-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(180deg, rgba(0,0,0,0.7) 60%, rgba(0,0,0,0.3) 100%);
+            z-index: 2;
+            pointer-events: none;
+        }
+        header > *:not(.header-bg-video):not(.header-overlay) {
+            position: relative;
+            z-index: 3;
+        }
+        .header-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+
+        h2 {
+            font-size: 2.5em;
+            color: rgb(255, 255, 255);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        #video-wrapper {
+          border-radius: 50px;
+          max-width: 720px;
+          padding-bottom: 40%; 
+          margin: 0 auto;
+          background: #000000;
+        }
+
+        .ethics-section {
+            padding: 100px 10%;
+            text-align: center;
+            margin-top: 60px;
+            color: #ccc;
+            max-width: 1500px;
+            margin: 0 auto;
+        }
+
+        .acknowledgements-section {
+            padding: 100px 10%;
+            text-align: center;
+            margin-top: 60px;
+            color: #ccc;
+            max-width: 1500px;
+            margin: 0 auto;
+        }
+
+        .video-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 50vh;
+        }
+        .video-container video {
+            width: 100%;
+            max-width: 1200px;
+            max-height: 750px;
+            height: auto;
+        }
+        .units-rule {
+            display: grid;
+            grid-auto-flow: column;
+            justify-content: center;
+            align-items: center;
+            column-gap: 0.75rem;
+        }
+        .units-rule i {
+            display: block;
+            width: 1px;
+            height: 1em;
+            background: currentColor;
+            opacity: 0.25;             /* 细且淡的竖线 */
+        }
+    </style>
+</head>
+<body>
+    <section id="intro">
+        <!-- 添加视频背景容器 -->
+        <div class="video-background">
+            <video autoplay playsinline muted loop>
+                <source src="./assets/videos/background.mp4" type="video/mp4">
+                Demo Video
+            </video>
+        </div>
+
+        <div class="content">
+            <div id="title-container">
+              <!-- <img id="title-icon" src="./assets/logo.png" alt="Icon"> -->
+              <h1><dt>OmniInsert</dt></h1>
+            </div>
+            <h2 style="font-size: 3.2rem; font-weight: 400;  color: #f7fcf9; ">Mask-Free Video Insertion of Any Reference via Diffusion Transformer Models</h2>
+            <div class="authors">
+                <span class="author-block"><a href="https://openreview.net/profile?id=~Jinshu_Chen2">Jinshu Chen</a><sup>*</sup></span>
+                <span class="author-block"><a href="https://github.com/Crayon-Shinchan">Xinghui Li</a><sup>*</sup><sup>&dagger;</sup></span>
+                <span class="author-block"><a href="https://openreview.net/profile?id=~Baixu1">Xu bai</a><sup>*</sup></span>
+                <span class="author-block"><a href="https://tianxiangma.github.io/">Tianxiang Ma</a></span>
+                <span class="author-block"><a href="https://openreview.net/profile?id=%7EPengze_Zhang1">Pengze Zhang</a></span>
+                <span class="author-block"><a href="https://scholar.google.com/citations?user=ow1jGJkAAAAJ">Zhuowei Chen</a></span>
+                <span class="author-block"><a href="https://scholar.google.com/citations?user=wqA7EIoAAAAJ">Gen Li</a></span>
+                <span class="author-block"><a href="https://liulj13.github.io">Lijie Liu</a></span>
+                <span class="author-block"><a href="https://openreview.net/profile?id=~Songtao_Zhao1">Songtao Zhao</a><sup>&dagger;</sup></span>
+                <span class="author-block"><a href="https://scholar.google.com/citations?user=ac5Se6QAAAAJ">Bingchuan Li</a><sup>&ddagger;</sup></span>
+                <span class="author-block"><a href="https://scholar.google.com/citations?user=9rWWCgUAAAAJ">Qian He</a></span>
+            </div>
+
+            <!-- Added the affiliations section -->
+            <div class="author-affiliation">
+                <p>
+                    <span>
+                        <sup>*</sup> Equal contribution, 
+                        <sup>&dagger;</sup> Corresponding author, 
+                        <sup>&ddagger;</sup> Project lead
+                    </span>
+                </p>
+                <p class="units-rule">
+                    <span>Intelligent Creation Lab, Bytedance</span>
+                </p>
+            </div>
+
+            <a class="button" href="https://arxiv.org/abs/2509.08519" target="_blank" rel="noopener noreferrer">
+                Research Paper
+            </a>
+            <a class="button" href="https://github.com/Phantom-video/OmniInsert" target="_blank" rel="noopener noreferrer">
+                <i class="fa fa-github" style="font-size:17px"></i>
+                GitHub
+            </a>
+        </div>
+    </section>
+
+    <div class="container text-center" style="margin-top: 50px; text-align: center;">
+      <p class="title-art3" style="font-size: 1.6em;"> Demo Video</p>
+      <!-- <p class="description" style="font-size: 1.0em;"> A short demo video by OmniInsert.</p> -->
+    </div>
+    
+
+    <div class="video-container">
+        <video controls>
+            <source src="./assets/videos/teaser.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <!-- <div class="flex flex-row">
+        <div class="prompt-wrap full-screen-wrap" style="position: relative;">
+            <div class="loading-placeholder">
+                <div class="loading-text">Loading...</div>
+                <div class="loading-icon">&#9749</div>
+            </div>
+            <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/teaser.mp4"></video>
+        </div>
+    </div> -->
+
+    <section id="video">
+        <div class="title" style="font-family: 'Alegreya'; font-size: 1.6em;">
+            Various Video Insertion Results
+        </div>
+        <div class="description">
+            <strong>Given any reference, OmniInsert seamlessly inserts the subjects into the original scenes, demonstrating robustness in various scenarios. </strong>
+        </div>
+
+        <div class="flex flex-dynamic">
+            <div class="prompt-wrap full-screen-wrap" style="position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ref_v/dress_15_mp4_accessory_17_png.mp4"></video>
+            </div>
+            <div class="prompt-wrap full-screen-wrap" style="position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ours/dress_15_mp4_accessory_17_png.mp4"></video>
+            </div>
+
+            <div class="prompt-wrap full-screen-wrap" style="position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ref_v/dongman_2_mp4_cartoon_001_png.mp4"></video>
+            </div>
+            <div class="prompt-wrap full-screen-wrap" style="position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ours/dongman_2_mp4_cartoon_001_png.mp4"></video>
+            </div>
+
+            <div class="prompt-wrap full-screen-wrap" style="position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ref_v/dongman_11_mp4_cartoon_006_png.mp4"></video>
+            </div>
+            <div class="prompt-wrap full-screen-wrap" style="position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ours/dongman_11_mp4_cartoon_006_png.mp4"></video>
+            </div>
+
+            <div class="prompt-wrap full-screen-wrap" style="position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ref_v/dongman_12_mp4_cartoon_012_png.mp4"></video>
+            </div>
+            <div class="prompt-wrap full-screen-wrap" style="position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ours/dongman_12_mp4_cartoon_012_png.mp4"></video>
+            </div>
+
+            <div class="prompt-wrap full-screen-wrap" style="position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ref_v/outdoor_26_mp4_cartoon_000_png.mp4"></video>
+            </div>
+            <div class="prompt-wrap full-screen-wrap" style="position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ours/outdoor_26_mp4_cartoon_000_png.mp4"></video>
+            </div>
+
+            <div class="prompt-wrap full-screen-wrap" style="position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ref_v/simplebg_16_mp4_halfbody_017_png.mp4"></video>
+            </div>
+            <div class="prompt-wrap full-screen-wrap" style="position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ours/simplebg_16_mp4_halfbody_017_png.mp4"></video>
+            </div>
+
+            <div class="prompt-wrap full-screen-wrap" style="position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ref_v/interact_3_mp4_cartoon_010_png.mp4"></video>
+            </div>
+            <div class="prompt-wrap full-screen-wrap" style="position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ours/interact_3_mp4_cartoon_010_png.mp4"></video>
+            </div>
+
+            <div class="prompt-wrap full-screen-wrap" style="position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ref_v/interact_30_mp4_animal_006_png.mp4"></video>
+            </div>
+            <div class="prompt-wrap full-screen-wrap" style="position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ours/interact_30_mp4_animal_006_png.mp4"></video>
+            </div>
+
+            <div class="prompt-wrap full-screen-wrap" style="position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ref_v/dress_4_mp4_accessory_14_png.mp4"></video>
+            </div>
+            <div class="prompt-wrap full-screen-wrap" style="position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ours/dress_4_mp4_accessory_14_png.mp4"></video>
+            </div>
+
+            <div class="prompt-wrap full-screen-wrap" style="position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ref_v/dress_6_mp4_accessory_6_png.mp4"></video>
+            </div>
+            <div class="prompt-wrap full-screen-wrap" style="position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ours/dress_6_mp4_accessory_6_png.mp4"></video>
+            </div>
+
+            <div class="prompt-wrap full-screen-wrap" style="position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ref_v/dress_10_mp4_accessory_3_png.mp4"></video>
+            </div>
+            <div class="prompt-wrap full-screen-wrap" style="position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ours/dress_10_mp4_accessory_3_png.mp4"></video>
+            </div>
+
+            <div class="prompt-wrap full-screen-wrap" style="position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ref_v/dress_17_mp4_accessory_20_png.mp4"></video>
+            </div>
+            <div class="prompt-wrap full-screen-wrap" style="position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ours/dress_17_mp4_accessory_20_png.mp4"></video>
+            </div>
+
+            <div class="prompt-wrap full-screen-wrap" style="position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ref_v/indoor_traffic_20_mp4_animal_007.mp4"></video>
+            </div>
+            <div class="prompt-wrap full-screen-wrap" style="position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ours/indoor_traffic_20_mp4_animal_007.mp4"></video>
+            </div>
+
+            <div class="prompt-wrap full-screen-wrap" style="position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ref_v/interact_19_mp4_animal_009_png.mp4"></video>
+            </div>
+            <div class="prompt-wrap full-screen-wrap" style="position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ours/interact_19_mp4_animal_009_png.mp4"></video>
+            </div>
+        </div>
+
+        <!-- <div class="flex flex-row" style="flex-direction: column; align-items: center;">
+            <div class="prompt-wrap full-screen-wrap" style="width: 60%; position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ref_v/interact_5_mp4_cartoon_033_png.mp4"></video>
+            </div>
+            <div class="prompt-wrap full-screen-wrap" style="width: 60%; position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ours/interact_5_mp4_cartoon_033_png.mp4"></video>
+            </div>
+            <div class="prompt-wrap full-screen-wrap" style="width: 60%; position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ref_v/interact_19_mp4_animal_009_png.mp4"></video>
+            </div>
+            <div class="prompt-wrap full-screen-wrap" style="width: 60%; position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/ours/interact_19_mp4_animal_009_png.mp4"></video>
+            </div>
+        </div> -->
+    </section>
+
+    <section id="Video Insertion Comparisons">
+        <div class="title" style="font-family: 'Alegreya'; font-size: 1.6em;">
+            Video Insertion Comparisons
+        </div>
+
+        <div class="description">
+            <strong>Compared with other methods, OmniInsert shows strong ability on Subject-Secne Equilibrium and Insertion Harmonization.</strong>
+        </div>
+
+        <!-- <div class="flex flex-dynamic"> -->
+        <div class="flex flex-row" style="flex-direction: column; align-items: center;">
+
+            <div class="prompt-wrap full-screen-wrap" style="width: 60%; position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/compare/comparison_1.mp4"></video>
+            </div>
+            <div class="prompt-wrap full-screen-wrap" style="width: 60%; position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/compare/comparison_2.mp4"></video>
+            </div>
+        </div>
+
+        <div class="flex flex-row" style="flex-direction: column; align-items: center;">
+
+            <div class="prompt-wrap full-screen-wrap" style="width: 60%; position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/compare/comparison_6.mp4"></video>
+            </div>
+            <div class="prompt-wrap full-screen-wrap" style="width: 60%; position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/compare/comparison_3.mp4"></video>
+            </div>
+        </div>
+
+        <!-- <div class="flex flex-row" style="flex-direction: column; align-items: center;">
+
+            <div class="prompt-wrap full-screen-wrap" style="width: 60%; position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/compare/comparison_7.mp4"></video>
+            </div>
+            <div class="prompt-wrap full-screen-wrap" style="width: 60%; position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/compare/comparison_4.mp4"></video>
+            </div>
+        </div>
+
+        <div class="flex flex-row" style="flex-direction: column; align-items: center;">
+
+            <div class="prompt-wrap full-screen-wrap" style="width: 60%; position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/compare/comparison_8.mp4"></video>
+            </div>
+            <div class="prompt-wrap full-screen-wrap" style="width: 60%; position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/compare/comparison_5.mp4"></video>
+            </div>
+        </div> -->
+
+        <div class="flex flex-row" style="flex-direction: column; align-items: center;">
+
+            <div class="prompt-wrap full-screen-wrap" style="width: 60%; position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/compare/comparison_11.mp4"></video>
+            </div>
+            <div class="prompt-wrap full-screen-wrap" style="width: 60%; position: relative;">
+                <div class="loading-placeholder">
+                    <div class="loading-text">Loading...</div>
+                    <div class="loading-icon">&#9749</div>
+                </div>
+                <video autoplay playsinline muted loop onloadeddata="this.style.display='block'; this.previousElementSibling.style.display='none';" src="./assets/videos/compare/comparison_12.mp4"></video>
+            </div>
+        </div>
+    </section>
+
+    <!-- <section id="Data Pipeline: InsertPipe">
+        <div class="title" style="font-family: 'Alegreya'; font-size: 1.6em;">
+            Data Pipeline: InsertPipe
+        </div>
+
+        <img src="assets/imgs/pipes.png"
+            alt="InsertPipe"
+            style="width: auto; max-width: 95%; height: auto; border-radius: 8px; display: inline-block;" />
+
+        <div class="description">
+            <strong>Compared with other methods, OmniInsert shows strong ability on Subject-Secne Equilibrium and Insertion Harmonization.</strong>
+        </div>
+    </section>
+
+    <section id="Framework: OmniInsert">
+        <div class="title" style="font-family: 'Alegreya'; font-size: 1.6em;">
+            Framework: OmniInsert
+        </div>
+
+        <img src="assets/imgs/framework.png"
+            alt="OmniInsert"
+            style="width: auto; max-width: 95%; height: auto; border-radius: 8px; display: inline-block;" />
+
+        <div class="description">
+            <strong>Compared with other methods, OmniInsert shows strong ability on Subject-Secne Equilibrium and Insertion Harmonization.</strong>
+        </div>
+    </section> -->
+
+    <section class="ethics-section">
+        <h3>Ethical Considerations</h3>
+        <p>
+            The reference images and videos used in these demo videos are sourced from public domains or generated by models, and are intended solely to demonstrate the capabilities of this research. If there are any concerns, please contact us (li-xh21@tsinghua.org.cn) and we will delete it in time.
+        </p>
+    </section>
+
+    <section class="bibtex-section">
+        <h3>BibTeX</h3>
+        <pre class="bibtex-code">@misc{chen2025omniinsert,
+            title={OmniInsert: Mask-Free Video Insertion of Any Reference via Diffusion Transformer Models}, 
+            author={XXX},
+            year={2025},
+            eprint={2509.08519},
+            archivePrefix={arXiv},
+            primaryClass={cs.CV},
+            url={XXX}, 
+        }</pre>
+    </section>
+
+</body>
+</html>
