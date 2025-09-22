@@ -6,6 +6,7 @@
 
 [Jinshu Chen](https://openreview.net/profile?id=~Jinshu_Chen2)<sup> * </sup>, [Xinghui Li](https://github.com/Crayon-Shinchan)<sup> * &dagger; </sup>, [Xu Bai](https://openreview.net/profile?id=~Baixu1)<sup> * </sup>, [Tianxiang Ma](https://tianxiangma.github.io/), [Pengze Zhang](https://openreview.net/profile?id=%7EPengze_Zhang1), <br>[Zhuowei Chen](https://scholar.google.com/citations?user=ow1jGJkAAAAJ), [Gen Li](https://scholar.google.com/citations?user=wqA7EIoAAAAJ), [Lijie Liu](https://liulj13.github.io/), [Songtao Zhao](https://openreview.net/profile?id=~Songtao_Zhao1)<sup> &dagger; </sup>, [Bingchuan Li](https://scholar.google.com/citations?user=ac5Se6QAAAAJ)<sup> &ddagger; </sup>, [Qian He](https://scholar.google.com/citations?user=9rWWCgUAAAAJ)<br>
 <sup> * </sup>Equal contribution, <sup> &dagger; </sup>Corresponding author, <sup> &ddagger; </sup>Project lead 
+
 Intelligent Creation Lab, ByteDance
 
 </div>
