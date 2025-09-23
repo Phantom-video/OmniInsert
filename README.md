@@ -1,7 +1,7 @@
 <div align="center">
 <h1> OmniInsert: Mask-Free Video Insertion of Any Reference via Diffusion Transformer Models </h1>
 
-<a href="https://arxiv.org/abs/2509.08519"><img src="https://img.shields.io/badge/arXiv%20paper-2509.08519-b31b1b.svg"></a>
+<a href="https://arxiv.org/abs/2509.17627"><img src="https://img.shields.io/badge/arXiv%20paper-2509.08519-b31b1b.svg"></a>
 <a href="https://phantom-video.github.io/OmniInsert/"><img src="https://img.shields.io/badge/Project_page-More_visualizations-green"></a>
 
 [Jinshu Chen](https://openreview.net/profile?id=~Jinshu_Chen2)<sup> * </sup>, [Xinghui Li](https://github.com/Crayon-Shinchan)<sup> * &dagger; </sup>, [Xu Bai](https://openreview.net/profile?id=~Baixu1)<sup> * </sup>, [Tianxiang Ma](https://tianxiangma.github.io/), [Pengze Zhang](https://openreview.net/profile?id=%7EPengze_Zhang1), <br>[Zhuowei Chen](https://scholar.google.com/citations?user=ow1jGJkAAAAJ), [Gen Li](https://scholar.google.com/citations?user=wqA7EIoAAAAJ), [Lijie Liu](https://liulj13.github.io/), [Songtao Zhao](https://openreview.net/profile?id=~Songtao_Zhao1)<sup> &dagger; </sup>, [Bingchuan Li](https://scholar.google.com/citations?user=ac5Se6QAAAAJ)<sup> &ddagger; </sup>, [Qian He](https://scholar.google.com/citations?user=9rWWCgUAAAAJ)<br>
@@ -20,7 +20,7 @@ Recent advances in video insertion based on diffusion models are impressive. How
 
 ## 🔥 Latest News
 
-* Sep 23, 2025: We release the [Project Page](https://phantom-video.github.io/OmniInsert/) and [Technique Report](https://arxiv.org/abs/2509.08519/) of **OmniInsert**.
+* Sep 23, 2025: We release the [Project Page](https://phantom-video.github.io/OmniInsert/) and [Technique Report](https://arxiv.org/abs/2509.17627) of **OmniInsert**.
 
 
 ## 📑 Todo List
@@ -41,10 +41,10 @@ If you find this project useful for your research, please consider citing our [p
       title={OmniInsert: Mask-Free Video Insertion of Any Reference via Diffusion Transformer Models}, 
       author={Jinshu Chen and Xinghui Li and Xu Bai and Tianxiang Ma and Pengze Zhang and Zhuowei Chen and Gen Li and Lijie Liu and Songtao Zhao and Bingchuan Li and Qian He},
       year={2025},
-      eprint={2509.08519},
+      eprint={2509.17627},
       archivePrefix={arXiv},
       primaryClass={cs.CV},
-      url={https://arxiv.org/abs/2509.08519}, 
+      url={https://arxiv.org/abs/2509.17627}, 
 }
 ```
 
